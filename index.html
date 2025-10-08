@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4F46E5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="시편119">
+    <meta name="description" content="시편 119편 히브리어 단어별 학습 앱">
+    <title>시편 119편 히브리어 학습</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='75' font-size='80'%3E📖%3C/text%3E%3C/svg%3E">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        const PSALM_119_DATA = [
+          {
+            hebrewLetter: "א (Aleph)",
+            startVerse: 1,
+            endVerse: 8,
+            verses: [
+              {
+                verse: 1,
+                hebrew: "אַשְׁרֵי תְמִימֵי־דָרֶךְ הַהֹלְכִים בְּתוֹרַת יְהוָה׃",
+                translation: "행위가 온전하여 여호와의 율법을 따라 행하는 자들은 복이 있음이여.",
+                words: [
+                  { h: "אַשְׁרֵי", t: "Ashrei", m: "복이 있는", r: "Interjection" },
+                  { h: "תְמִימֵי־דָרֶךְ", t: "temimei-darekh", m: "길이 온전한 자들", r: "Noun phrase" },
+                  { h: "הַהֹלְכִים", t: "hahol'khim", m: "걷는 자들", r: "Verb (Piel Participle)" },
+                  { h: "בְּתוֹרַת", t: "b'torat", m: "율법 안에", r: "Noun (Torah)" },
+                  { h: "יְהוָה", t: "YHWH", m: "여호와", r: "Proper Noun" }
+                ]
+              },
+              {
+                verse: 2,
+                hebrew: "אַשְׁרֵי שֹׁמְרֵי עֵדֹתָיו בְּכָל־לֵב יִדְרְשׁוּהוּ׃",
+                translation: "여호와의 증거들을 지키고 전심으로 여호와를 구하는 자들은 복이 있도다.",
+                words: [
+                  { h: "אַשְׁרֵי", t: "Ashrei", m: "복이 있는", r: "Interjection" },
+                  { h: "שֹׁמְרֵי", t: "shom'rei", m: "지키는 자들", r: "Verb (Qal Participle)" },
+                  { h: "עֵדֹתָיו", t: "edotav", m: "그의 증거들", r: "Noun" },
+                  { h: "בְּכָל־לֵב", t: "b'khol-lev", m: "온 마음으로", r: "Prepositional Phrase" },
+                  { h: "יִדְרְשׁוּהוּ", t: "yidr'shuhu", m: "그를 구하는", r: "Verb (Qal Imperfect)" }
+                ]
+              },
+              {
+                verse: 3,
+                hebrew: "אַף לֹא־פָעֲלוּ עַוְלָה בִּדְרָכָיו הָלָכוּ׃",
+                translation: "또 저희는 불의를 행치 아니하고 그의 도를 행하는도다.",
+                words: [
+                  { h: "אַף", t: "Af", m: "또한", r: "Adverb" },
+                  { h: "לֹא־פָעֲלוּ", t: "lo-fa'alu", m: "행하지 않았다", r: "Verb (Qal Perfect)" },
+                  { h: "עַוְלָה", t: "avlah", m: "불의", r: "Noun" },
+                  { h: "בִּדְרָכָיו", t: "bidrakhav", m: "그의 길에서", r: "Prepositional Phrase" },
+                  { h: "הָלָכוּ", t: "halakhu", m: "그들이 걸었다", r: "Verb (Qal Perfect)" }
+                ]
+              }
+            ]
+          }
+        ];
+
+        const findVerseByNumber = (verseNum) => {
+          for (const stanza of PSALM_119_DATA) {
+            for (const verse of stanza.verses) {
+              if (verse.verse === verseNum) return verse;
+            }
+          }
+          return PSALM_119_DATA[0].verses[0];
+        };
+
+        const WordDetailModal = ({ selectedWord, onClose }) => {
+          if (!selectedWord) return null;
+
+          return (
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50"
+              onClick={onClose}
+            >
+              <div 
+                className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-start border-b pb-3 mb-4">
+                  <h3 className="text-3xl font-bold text-gray-800" dir="rtl">{selectedWord.h}</h3>
+                  <button onClick={onClose} className="p-2 text-gray-500 hover:bg-gray-100 rounded-full text-2xl leading-none">
+                    ×
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs font-semibold text-gray-600 mb-1">음역</p>
+                    <p className="text-lg font-mono text-indigo-700">{selectedWord.t}</p>
+                  </div>
+                  
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs font-semibold text-gray-600 mb-1">의미</p>
+                    <p className="text-lg text-gray-800">{selectedWord.m}</p>
+                  </div>
+
+                  <div className="p-3 bg-gray-50 rounded-lg">
+                    <p className="text-xs font-semibold text-gray-600 mb-1">품사</p>
+                    <p className="text-base text-gray-700">{selectedWord.r}</p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={onClose} 
+                  className="mt-6 w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg active:bg-indigo-700"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          );
+        };
+
+        const App = () => {
+          const [currentVerseNum, setCurrentVerseNum] = useState(1);
+          const [selectedWord, setSelectedWord] = useState(null);
+
+          const lastAvailableVerse = useMemo(() => 
+            Math.max(...PSALM_119_DATA.flatMap(stanza => stanza.verses.map(v => v.verse)))
+          , []);
+
+          const currentVerse = useMemo(() => findVerseByNumber(currentVerseNum), [currentVerseNum]);
+          
+          const currentStanza = useMemo(() => 
+            PSALM_119_DATA.find(s => s.startVerse <= currentVerseNum && s.endVerse >= currentVerseNum) || PSALM_119_DATA[0]
+          , [currentVerseNum]);
+
+          const navigateVerse = (direction) => {
+            const nextVerseNum = currentVerseNum + direction;
+            if (nextVerseNum >= 1 && nextVerseNum <= lastAvailableVerse) {
+              setCurrentVerseNum(nextVerseNum);
+            }
+          };
+
+          const hebrewWords = useMemo(() => {
+            return currentVerse.words.map((wordData, index) => (
+              <span
+                key={index}
+                className="inline-block mx-1 py-2 px-3 rounded-lg cursor-pointer transition-all active:bg-yellow-200 hover:bg-yellow-100 text-gray-900"
+                onClick={() => setSelectedWord(wordData)}
+              >
+                {wordData.h}
+              </span>
+            ));
+          }, [currentVerse]);
+
+          return (
+            <div className="min-h-screen bg-gray-50 flex flex-col">
+              <header className="bg-indigo-600 text-white shadow-lg p-4 sticky top-0 z-10">
+                <div className="flex justify-between items-center max-w-2xl mx-auto">
+                  <h1 className="text-lg font-bold">📖 시편 119편</h1>
+                  <button 
+                    className="p-2 bg-indigo-700 rounded-full active:bg-indigo-800"
+                    onClick={() => setCurrentVerseNum(1)}
+                  >
+                    🏠
+                  </button>
+                </div>
+              </header>
+
+              <main className="flex-grow p-4 max-w-2xl mx-auto w-full pb-20">
+                <div className="bg-white rounded-xl shadow-xl p-5 mb-6 border-t-4 border-indigo-500">
+                  <p className="text-sm font-semibold text-indigo-500 mb-2">
+                    {currentStanza.hebrewLetter} | <span className="text-2xl">{currentVerseNum}</span>절
+                  </p>
+
+                  <h2 
+                    className="text-4xl text-right my-4 leading-relaxed text-gray-900" 
+                    dir="rtl"
+                  >
+                    {hebrewWords}
+                  </h2>
+
+                  <div className="mt-5 pt-4 border-t">
+                    <p className="text-xs font-semibold text-gray-500">번역</p>
+                    <p className="text-base text-gray-700 leading-relaxed mt-1">
+                      {currentVerse.translation}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => navigateVerse(-1)} 
+                    disabled={currentVerseNum <= 1}
+                    className="flex-1 py-4 bg-gray-200 text-gray-700 font-bold rounded-lg active:bg-gray-300 disabled:opacity-50 text-lg"
+                  >
+                    ← 이전
+                  </button>
+                  
+                  <button 
+                    onClick={() => navigateVerse(1)} 
+                    disabled={currentVerseNum >= lastAvailableVerse}
+                    className="flex-1 py-4 bg-indigo-500 text-white font-bold rounded-lg active:bg-indigo-600 disabled:opacity-50 text-lg"
+                  >
+                    다음 →
+                  </button>
+                </div>
+
+                <p className="text-center text-xs text-gray-400 mt-4">
+                  단어를 탭하면 상세 정보를 볼 수 있습니다
+                </p>
+              </main>
+
+              <WordDetailModal 
+                selectedWord={selectedWord} 
+                onClose={() => setSelectedWord(null)} 
+              />
+            </div>
+          );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+    <script>
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker 등록 성공'))
+                    .catch(err => console.log('Service Worker 등록 실패:', err));
+            });
+        }
+    </script>
+</body>
+</html>
